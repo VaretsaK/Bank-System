@@ -117,24 +117,25 @@ class BankAccount(AbstractBankAccount):
 
     __account_counter = 0
 
-    def __init__(self, owner: Customer, balance: int = 0) -> None:
+    def __init__(self, owner: Customer) -> None:
         """
         Initializes a new BankAccount instance.
         Args:
             owner (Customer): The owner of the bank account.
-            balance (int, optional): The initial balance of the bank account. Defaults to 0.
         """
 
         BankAccount.__account_counter += 1
 
         self.owner = owner
-        self.__balance = balance
+        self.__balance = 0
         self.__account_number = BankAccount.__account_counter
+        self.__account_initiation = True
 
     def top_up(self, value: int) -> str:
         if value <= 0:
             raise ValueError("Top ups should be positive amount.")
         self.__balance += value
+        self.__account_initiation = False
         return f"You have topped up {value} USD. Current balance: {self.__balance} USD"
 
     def withdraw(self, value: int) -> str:
@@ -149,6 +150,18 @@ class BankAccount(AbstractBankAccount):
     def get_account_owner_info(self) -> str:
         return self.owner.get_info()
 
+    @property
+    def balance(self) -> int:
+        return self.__balance
+
+    @balance.setter
+    def balance(self, value: int):
+        if value <= 0:
+            raise ValueError("Balance should be above 0.")
+        if self.__account_initiation:
+            self.__balance = value
+            self.__account_initiation = False
+
 
 def main() -> None:
     """
@@ -156,12 +169,15 @@ def main() -> None:
     """
     customer1 = Customer("Davide Blane", "dave@mail.com")
     customer3 = Customer("Mark", "mark@mail.ua")
-    cust1_account = BankAccount(customer1, 500)
-    cust3_account = BankAccount(customer3, 1500)
+    cust1_account = BankAccount(customer1)
+    cust3_account = BankAccount(customer3)
     print(cust1_account.get_account_owner_info())
-    print(cust3_account.top_up(900))
     print(cust3_account.get_account_number())
     print(cust3_account.get_account_owner_info())
+    cust3_account.balance = 222
+    print(cust3_account.balance)
+    cust3_account.balance = 2202
+    print(cust3_account.balance)
 
 
 if __name__ == "__main__":
